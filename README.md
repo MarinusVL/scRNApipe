@@ -1,6 +1,6 @@
-# _scRNAware_
+# _scRNApipe_
 
-The scRNAware pipeline was originally designed to preprocess and analyse scRNA-Seq data, following the CEL-Seq2 protocol, on the Illumina platforms. Nevertheless, by data transformation, provided by UMIS package, will allow most of single cell protocols to be run through this pipeline.
+The scRNApipe pipeline was originally designed to preprocess and analyse scRNA-Seq data, following the CEL-Seq2 protocol, on the Illumina platforms. Nevertheless, by data transformation, provided by UMIS package, will allow most of single cell protocols to be run through this pipeline.
 
 
 Read transformation will combine reads into one containing cell, sample and umi barcode sequences incorporated in the read name + a unique identifier (UID) created by concatenating those three barcodes. This UID will allow UMI-tools to remove PCR duplicates on bamfiles containing multiple cells.
@@ -18,7 +18,7 @@ In principle, the raw data will be readtransformed and filtered (by UMIs), align
 >* Skip deduplication
 
 <br />
-## scRNAware In Details
+## scRNApipe In Details
 
 #### 1. Quality metrics from FastQC
 Detailed reports will be generated for each sample by FastQC. An the end a summarised report will be available for an overall review of all samples at once. 
@@ -63,8 +63,8 @@ Enter repository and run:
 
 For further information about each compartment of the pipeline you can run:
 
-	$ scRNAware --help
+	$ scRNApipe --help
 
 ### __Dependencies__
 
-scRNAware is dependent on umis, umi_tools, numpy, pysam, STAR, featureCounts, fastqc and multiqc
+scRNApipe is dependent on umis, umi_tools, numpy, pysam, STAR, featureCounts, fastqc and multiqc
