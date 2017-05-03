@@ -18,6 +18,7 @@ In principle, the raw data will be readtransformed and filtered (by UMIs), align
 >* Skip deduplication
 
 <br />
+
 ## scRNApipe In Details
 
 #### 1. Quality metrics from FastQC
