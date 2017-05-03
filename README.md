@@ -60,6 +60,11 @@ Enter repository and run:
 	
     $ python setup.py install
 
+### __Execulting__
+
+After installation the pipeline can be used:
+
+	$ scRNApipe <configuration_file.txt>
 
 ### __Help__
 
