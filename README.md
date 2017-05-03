@@ -49,6 +49,7 @@ Aligning the preprocessed reads against the reference genome by the use of the S
 Generate the Expression Matrix based on the GeneID tags 
 
 <br />
+
 ## __Installation__ and __Info__
 
 If you'd like to work directly from the git repository:
