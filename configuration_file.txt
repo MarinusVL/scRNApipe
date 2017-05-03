@@ -1,0 +1,99 @@
+############################################################################################################
+### 									scRNApipe configuration file                                     ### ##                                      
+##
+##	* General_Info - Input general parameters
+##		threads: # of threads to be used in the analysis in the whole analysis
+##
+##	* Quality_Control - activation/deactivation parameters
+##		no_QualityControl: if set True, no Quality Control will be performed
+##
+##	* Preprocessing
+##		no_PreProcessing: if set True, no PreProcessing will be performed
+##		cellular_barcodes: .txt file with list of all cellular barcodes contained in the reads
+##		transformation_file: .json pointing out the information position of R1 and R2
+##		sample_barcodes: .txt file containing the list with all sample barcodes used in the samples
+##		
+##		### For further details about the above files, please visit umis at GitHub ###
+##
+##	* Ref.Genome_Aligning
+##		no_ALignment: if set True, no aligning against the reference genome will be performed
+##		### Refers to the default aligner - STAR ###
+##		reference_genome_idx: path to the reference genome indexes
+##
+##	* Analysis - regulation parameters
+##		no_CounTing: if set True, no main analysis will be performed
+##		no_dedup: if set True, no PCR deduplication step will be performed
+##		skip_unassigned: if set True, unassigned reads will not be included in further analysis. This
+##						 option is valid only in combination with "gene" implementation!
+##		implementation: "gene" (options: gene, feature, default)
+##		annotation_file: path to annotation file (.gtf file contain mRNA and ERCC annotation)
+##
+##	* Expression_Matrix - regulation parameters 
+##		no_ExMat: if set True, no Expression Matrix will be generated
+##		skip_genes: if set True, genes not found in the analysis will be skipped from the final
+##					Expression Matrix 
+##		gene_list: path to mRNA ID list file (.csv file contain mRNA and ERCC IDs in a list)
+##
+##	* IO_Info - Input/Output options
+##		input_dir: path to input Data folder (e.g home/Data)
+##		input_files: paths to input pair-end files (e.g home/XX_R1.fq.gz home/XX_R2.fq.gz) 
+##					 OR wildcard option (e.g home/*fastq.gz)
+##		output_dir: path of the output directory that all files of the  analysis will be stored
+##					(default: current directory)
+##
+##	This file contains the necessary input information (options/paths) for the correct analysis approach 
+##	according to the dataset demands. The pipeline's sub-sessions contained can be optionally skipped
+##	by changing the boolean values from False to True. The input directory path (that contains the data)
+##	OR the input pair-end file OR input wildcard path is mandatory. If output_dir or input option won't 
+##	be used, SHOULD BE MARKED with "-". The whole pipeline was designed to run fast and accurate with 
+##	compressed data. Supported files: .fastq.gz/.fq.gz
+##	
+##	For further information concerning each option:
+##			
+##										scRNApipe --help
+##	
+##	
+##	Running the pipeline:
+##
+##								scRNApipe <configuration_file.txt>	
+### 																									 ###
+############################################################################################################
+
+[General_Info]
+threads = 1
+
+
+[Quality_Control]
+no_QualityControl = False
+
+
+[Preprocessing]
+no_PreProcessing = False
+transformation_file = /transform.json
+cell_barcodes = /barcode_umis_HSC2.txt
+sample_barcodes = /sample_barcodes_CS2.txt
+
+
+[RefGenome_Aligning]
+no_ALignment = False
+reference_genome_idx = /Star_overhang69
+
+
+[MainAnalysis]
+no_CounTing = False
+no_dedup = False
+skip_unassigned = True
+implementation = gene 
+annotation_file = /GCv25_prim_assem_ERCC.gtf
+
+
+[Expression_Matrix]
+no_ExMat = False
+skip_genes = False
+gene_list = /GeneID_ERCC.csv
+
+
+[IO_Info]
+input_dir = -
+input_files = -
+output_dir = -
