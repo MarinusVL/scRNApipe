@@ -70,8 +70,8 @@ no_QualityControl = False
 [Preprocessing]
 no_PreProcessing = False
 transformation_file = /transform.json
-cell_barcodes = /barcode_umis_HSC2.txt
-sample_barcodes = /sample_barcodes_CS2.txt
+cell_barcodes = /cell_barcodes.txt
+sample_barcodes = /sample_barcodes.txt
 
 
 [RefGenome_Aligning]
@@ -90,7 +90,7 @@ annotation_file = /GCv25_prim_assem_ERCC.gtf
 [Expression_Matrix]
 no_ExMat = False
 skip_genes = False
-gene_list = /GeneID_ERCC.csv
+gene_list = /GeneID.csv
 
 
 [IO_Info]
