@@ -10,7 +10,7 @@ In principle, the raw data will be readtransformed and filtered (by UMIs), align
  * Quality metrics (optional)
  * Preprocessing 
  * Aligning
- * Main Analisys
+ * Main Analysis
  * Expression Matrix
 
 >Main _options_ to tune in this pipeline:
@@ -60,7 +60,7 @@ Enter repository and run:
 	
     $ python setup.py install
 
-### __Execulting__
+### __Executing__
 
 After installation the pipeline can be used:
 
