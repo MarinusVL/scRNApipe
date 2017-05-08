@@ -56,7 +56,7 @@ def parse_commandline():
                 \n\t2. Cell and Molecular Barcode transformation\
                 \n\t3. Filtering Reads with non-matching CELL barcodes (CB)\
                 \n\t4. Filtering Reads with non-matching SAMPLE barcodes (SB)\
-                \n\t5. Filtering umi Reads with ambiguous (e.g N) bases\
+                \n\t5. Filtering Reads with ambiguous (e.g N) bases in the UMI barcodes\
                 \n\t6. UID addition\
                 \n\t7. Aligning reads against the reference genome (GRCh38.p7)\
                 \n\t   Main analysis (check positional arguments)\
