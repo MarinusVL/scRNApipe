@@ -72,9 +72,9 @@ def parse_commandline():
     parser.add_argument("implementation", nargs='*', default="gene", choices=["gene", "feature", "default"],
                             help="After preprocessing and mapping against the reference genome (default: STAR aligner),\
                             \nthe following choices of analysis are provided:\
-                            \n\nGENE (default)\n8. Counting features\n9. GeneID tag to .bam files\n10. UMI's per Gene deduplication\n(\"gene-tag:GeneID\", where GeneID obtained from featureCounts)\
-                            \n\nFEATURE\n8. UMI's per Alignment Feature deduplication\n(\"per-contig\")\n9. Counting features\
-                            \n\nDEFAULT\n8. UMI's default settings for deduplication\n9. Counting features")
+                            \n\nGENE (default)\n8. Counting features\n9. GeneID tag to .bam files\n10. UMI-Tools per Gene deduplication\n(\"gene-tag:GeneID\", where GeneID obtained from featureCounts)\
+                            \n\nFEATURE\n8. UMI-Tools per Alignment Feature deduplication\n(\"per-contig\")\n9. Counting features\
+                            \n\nDEFAULT\n8. UMI-Tools default settings for deduplication\n9. Counting features")
 
     # Number of threads to be used
     parser.add_argument("--threads", dest="threads", type=int, default=1, 
