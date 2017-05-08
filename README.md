@@ -30,7 +30,7 @@ Detailed reports will be generated for each sample by FastQC. An the end a summa
 2.	_umis fastqtrasnform_ (read transformation)
 3.	_cb_filter_ (filtering reads with non-matching CELLULAR barcodes (<span style="color:red">CB</span>) | 1 mismatch is allowed) 
 4.	_sb_filter_ (filtering reads with non-matching SAMPLE barcodes (<span style="color:blue">SB</span>) | 1 mismatch is allowed) 
-5.  _mb_filter_ (removing with ambiguous (e.g N) bases) 
+5.  _mb_filter_ (removing reads with ambiguous (e.g N) bases in the UMI barcodes) 
 6.  _add_uid_ (add the UID and save as fastq.gz)
 
 The read name after preprocessing will include
