@@ -37,7 +37,7 @@ def parse_commandline():
     global implementation
     global thrds
 
-    usage = "scrnapipe <configuration_file.txt>"
+    usage = "scRNApipe <configuration_file.txt>"
     
     description = "DESCRIPTION\
                    \n-----------\
@@ -46,17 +46,20 @@ def parse_commandline():
                 \ninput is a configuration file containing the necessary information needed for\
                 \nthe pipeline. This file also contains several options, which will dictate the\
                 \ndifferent analysis approaches according to the demands.  The pipeline has se-\
-                \nveral steps which (few) can optionally be skipped. The script consists of two\
+                \nveral steps which (all) can optionally be skipped. The script consists of two\
                 \nmain parts of analysis. The first performs preprocessing of the data.The next\
-                \nmajor part performs the main analysis which will terminate with the Expressi-\
-                \non Matrix construction along with a basic statistical analysis of the results\
-                \nDuring  sample (SB) and cell barcode (CB) filtering, one mismatch is allowed.\
+                \nmajor part performs the main analysis, which will terminate with the Express-\
+                \nion Matrix construction.Moreover, overall Quality Control reports, a log file\
+                \nto keep track of the analysis and the  \"Summary.csv\" file containing quantity\
+                \nvalues generated from each part of the pipeline, will also be exported (check\
+                \n\"Reports\" folder). During Sample (SB) and Cell barcode (CB) filtering,one (by\
+                \ndefault) mismatch is allowed. The allowed mismatches can be regulated!\
                 \n\n\tThe analysis contains the following steps:\
                 \n\t1. Quality Control\
                 \n\t2. Cell and Molecular Barcode transformation\
                 \n\t3. Filtering Reads with non-matching CELL barcodes (CB)\
                 \n\t4. Filtering Reads with non-matching SAMPLE barcodes (SB)\
-                \n\t5. Filtering Reads with ambiguous (e.g N) bases in the UMI barcodes\
+                \n\t5. Filtering Reads with ambiguous bases in the UMI-barcodes (e.g N)\
                 \n\t6. UID addition\
                 \n\t7. Aligning reads against the reference genome (GRCh38.p7)\
                 \n\t   Main analysis (check positional arguments)\
@@ -70,23 +73,23 @@ def parse_commandline():
    
     ### Different pipeline implementations ###
     parser.add_argument("implementation", nargs='*', default="gene", choices=["gene", "feature", "default"],
-                            help="After preprocessing and mapping against the reference genome (default: STAR aligner),\
+                            help="After preprocessing and mapping against the reference genome (with STAR aligner),\
                             \nthe following choices of analysis are provided:\
-                            \n\nGENE (default)\n8. Counting features\n9. GeneID tag to .bam files\n10. UMI-Tools per Gene deduplication\n(\"gene-tag:GeneID\", where GeneID obtained from featureCounts)\
-                            \n\nFEATURE\n8. UMI-Tools per Alignment Feature deduplication\n(\"per-contig\")\n9. Counting features\
-                            \n\nDEFAULT\n8. UMI-Tools default settings for deduplication\n9. Counting features")
+                            \n\nGENE (default)\n8. Counting features\n9. GeneID tag to .bam files\n10. UMI's per Gene deduplication\nGene: GeneID obtained from featureCounts\
+                            \n\nFEATURE\n8. UMI's per Alignment Feature deduplication\nFeature: reference sequence name (RNAME)\n9. Counting features\
+                            \n\nDEFAULT\n8. UMI's default settings for deduplication\nDefault: first mapping coordinates of the reads\n9. Counting features")
 
     # Number of threads to be used
     parser.add_argument("--threads", dest="threads", type=int, default=1, 
                         help="\nNumber of threads to be used in the analysis")
     # Skip PCR deduplication step
     parser.add_argument("--no_dedup",dest = "no_dedu", action="store_true", 
-                        help="\nIf this option is activated, then no deduplication step will be performed.\nThe results will contain PCR duplicates.")
+                        help="\nIf this option is activated, then no deduplication step will be performed.\nThe results will contain amplification duplicates.")
 
     # Choice for discarding unassigned reads in SAM files
     parser.add_argument("--skip_unassigned", dest ="skip_unassigned", action="store_true", 
-                        help="\nThis option can be combined with the default implementation - \"gene\"\n(in any other implementation choices, will have no effect).\
-                        \nDuring SAM file reformatting, the unassigned reads detected in\nfeatureCounting will be discarded.\
+                        help="\nThis option can be combined with the \"gene\" implementation (in any other implementation choices, it will have no effect).\
+                        \nDuring BAM file reformatting, the unassigned reads detected in\nfeatureCounting will be discarded.\
                         \nATTENTION: By activating it, the time of the analysis will decrease!\
                         \nWARNING: During expression matrix construction, NO status of the unassigned reads will be generated!")
     
@@ -114,15 +117,12 @@ def parse_commandline():
     # Skip counting
     parser.add_argument("--no_CounTing", dest="no_CounTing", action='store_true', 
                         help="\nIf this option is activated, counting will be skipped.\
-                        \nProgram will skip the main analysis of the preprocessed data.\
-                        \nWARNING: Expression Matrix and Statistics will also be skipped.\
+                        \nNo Main Analysis will be performed.\
                         \nATTENTION: By activating it, the time of the analysis will decrease!")    
 
     # Skip Expression Matrix
     parser.add_argument("--no_ExMat", dest="no_ExMat", action='store_true', 
                         help="\nIf this option is activated, Expression Matrix generation will be skipped.\
-                        \nProgram will skip the main analysis of the preprocessed data.\
-                        \nWARNING: If NO expression matrix will be found, StaTistics session will be skipped.\
                         \nATTENTION: By activating it, the time of the analysis will decrease!")    
 
 
@@ -132,13 +132,18 @@ def parse_commandline():
     # Cell_barcodes
     parser.add_argument("--cell_barcodes", nargs=1, help="\nFile containing all possible Cell Barcodes (CB) used in the sample.")
 
+    parser.add_argument("--cell_barcode_mm", nargs=1, help="\nNumber of allowed mismatches in the Cell Barcodes (CB) (default: 1)")
+
+    # Sample barcodes
     parser.add_argument("--sample_barcodes", nargs=1, help="\nFile containing all possible Sample Barcodes (SB) used in the sample.")
+    
+    parser.add_argument("--sample_barcode_mm", nargs=1, help="\nNumber of allowed mismatches in the Sample Barcodes (SB). (default: 1)")
 
     parser.add_argument("--reference_genome_idx", nargs=1, help="\nDirectory that contains STAR's (default aligner) reference genome indexes.")
 
-    parser.add_argument("--annotation_file", nargs=1, help="\n\".gtf\" file containing the reference transcriptome annotation (and ERCC annotation).")
+    parser.add_argument("--annotation_file", nargs=1, help="\n\".gtf\" file containing the reference transcriptome annotation (and ERCC annotation, if used).")
 
-    parser.add_argument("--gene_list", nargs=1, help="\n\".csv\" file containing a list of the Gene ID's (and ERCC if used).")
+    parser.add_argument("--gene_list", nargs=1, help="\n\".csv\" file containing a list of the Gene ID's (and ERCC, if used).")
     
     # input folder option
     parser.add_argument("--input_dir", nargs=1, help="\nPath of the input directory that contains the data.")
@@ -301,25 +306,10 @@ def quality_control(fastqc_files):
 
     run_qc_r2 = " ".join(["fastqc", "--threads", thrds, "-q", "-o", qc_folder, fastqc_files])
     subprocess.call(run_qc_r2, shell=True) 
-    try:
-        # Running MultiQC to get a summed Quality Control, summed evaluation of featureCounts and STAR aligner.
-        run_mc = " ".join(["multiqc", "-q", "-o", reports_folder, "-n", "FinalReport", reports_folder])
-        subprocess.call(run_mc, shell=True)
-        #Deleting .zip files from FastQC reports.
-        for path, subdirs, files in os.walk(reports_folder):
-            for name in files:
-                if name.endswith("fastqc.zip"):
-                    zipped_reports = os.path.join(path, name)
-                    os.remove(zipped_reports)
-        # Removing byproducts produced by MultiQC.           
-        shutil.rmtree(os.path.join(reports_folder,"FinalReport_data"))
-    
-    except:
-        pass
 
     return
 
-def preprocessing(input_files, numoffiles, transformation_file, cell_barcodes, sample_barcodes):
+def preprocessing(input_files, numoffiles, transformation_file, cell_barcodes, sample_barcodes, cell_mm, sample_mm):
     
 
     Preprocessing_stime = datetime.now()
@@ -334,7 +324,8 @@ def preprocessing(input_files, numoffiles, transformation_file, cell_barcodes, s
         print "%s | 2. Cell and Molecular barcode transformation: in progress .." %(Demult_stime.strftime("%H:%M:%S"))
         run_demult = " ".join(["umis", "fastqtransform", "--cores", thrds, transformation_file, pairs[0], pairs[1], ">",
         os.path.join(processed_data_folder, pairs[1].split("/")[-1].split(".")[0]+"_trsf.fastq")])
-        if i == 0: rep.append("UMIs - TRANSFORMATION\n"+run_demult)   
+        w_demult = " ".join([item.split("/")[-1] if "/" in item else item for item in run_demult.split()])
+        if i == 0: rep.append("UMIs - TRANSFORMATION\n"+w_demult)   
         try:
             subprocess.call(run_demult, shell=True)
         except Exception as e: print "FATAL ERROR - ", e  
@@ -353,9 +344,10 @@ def preprocessing(input_files, numoffiles, transformation_file, cell_barcodes, s
                     In_num_lines = sum(1 for line in open(fastqtoCBfilter))
                     summarise[fastqtoCBfilter.split("/")[-1].split("_trsf")[0]].append(("Initial Reads", In_num_lines/4))
 
-                    run_CBfilter = " ".join(["umis", "cb_filter", "--cores", thrds, "--nedit", "1", "--bc1", cell_barcodes, 
+                    run_CBfilter = " ".join(["umis", "cb_filter", "--cores", thrds, "--nedit", cell_mm, "--bc1", cell_barcodes, 
                     fastqtoCBfilter, ">", fastqtoCBfilter.replace("_trsf","_cb")])
-                    if i == 0: rep.append("UMIs - CELL BARCODE FILTER\n"+run_CBfilter) 
+                    wCBfilter = " ".join([item.split("/")[-1] if "/" in item else item for item in run_CBfilter.split()])
+                    if i == 0: rep.append("UMIs - CELL BARCODE FILTER\n"+wCBfilter) 
                     try:
                         subprocess.call(run_CBfilter, shell=True)
                     except Exception as e: print "FATAL ERROR - ", e  
@@ -367,9 +359,10 @@ def preprocessing(input_files, numoffiles, transformation_file, cell_barcodes, s
         sbfiltering_stime = datetime.now()
         print "%s | 4. Filtering Reads with non-matching sample barcodes: in progress .." %(filtering_stime.strftime("%H:%M:%S"))
         fastqtoSBfilter = fastqtoCBfilter.replace("_trsf","_cb")
-        run_SBfilter = " ".join(["umis", "sb_filter", "--cores", thrds, "--nedit", "1", "--bc", sample_barcodes, 
+        run_SBfilter = " ".join(["umis", "sb_filter", "--cores", thrds, "--nedit", sample_mm, "--bc", sample_barcodes, 
         fastqtoSBfilter, ">", fastqtoSBfilter.replace("_cb","_sb")])
-        if i == 0: rep.append("UMIs - SAMPLE BARCODE FILTER\n"+run_SBfilter)
+        wSBfilter = " ".join([item.split("/")[-1] if "/" in item else item for item in run_SBfilter.split()])
+        if i == 0: rep.append("UMIs - SAMPLE BARCODE FILTER\n"+wSBfilter)
         try:
             subprocess.call(run_SBfilter, shell=True)
         except Exception as e: print "FATAL ERROR - ", e  
@@ -383,7 +376,8 @@ def preprocessing(input_files, numoffiles, transformation_file, cell_barcodes, s
         fastqtoMBfilter = fastqtoSBfilter.replace("_cb","_sb")
         run_MBfilter = " ".join(["umis", "mb_filter", "--cores", thrds, 
         fastqtoMBfilter, ">", fastqtoMBfilter.replace("_sb","_mb")])
-        if i == 0: rep.append("UMIs - FILTERING READS WITH AMBIGUOUS BASES\n"+run_MBfilter)
+        wMBfilter = " ".join([item.split("/")[-1] if "/" in item else item for item in run_MBfilter.split()])
+        if i == 0: rep.append("UMIs - FILTERING READS WITH AMBIGUOUS BASES\n"+wMBfilter)
         try:
             subprocess.call(run_MBfilter, shell=True)
         except Exception as e: print "FATAL ERROR - ", e
@@ -402,7 +396,8 @@ def preprocessing(input_files, numoffiles, transformation_file, cell_barcodes, s
 
         run_addUID = " ".join(["umis", "add_uid", "--cores", thrds, 
         fastqtoUID, "| gzip -1", ">", fastqtoUID.replace("_mb.fastq",".fastq.gz")])
-        if i == 0: rep.append("UMIs - UID ADDITION\n"+run_addUID)
+        waddUID = " ".join([item.split("/")[-1] if "/" in item else item for item in run_addUID.split()])
+        if i == 0: rep.append("UMIs - UID ADDITION\n"+waddUID)
         try:
             subprocess.call(run_addUID, shell=True)
         except Exception as e: print "FATAL ERROR - ", e  
@@ -430,7 +425,8 @@ def aligning(reference_genome_idx):
                     print " %d/%d - Aligning %s against the reference genome .." %((i+1), numoffile, name.split(".")[0])
                     run_STAR = " ".join(["STAR", "--runThreadN", thrds, "--genomeDir", reference_genome_idx, "--outSAMtype BAM SortedByCoordinate", "--outSAMmultNmax 1", "--outFilterMultimapNmax 20", "--outFilterType BySJout", "--outFileNamePrefix", os.path.join(aligned_folder, name[:-9]),
                     "--readFilesCommand gunzip -c", "--readFilesIn", star_input])
-                    if i == 0: rep.append("STAR ALIGNER\n"+run_STAR)
+                    wrun_STAR = " ".join([item.split("/")[-1] if "/" in item else item for item in run_STAR.split()])
+                    if i == 0: rep.append("STAR ALIGNER\n"+wrun_STAR)
                     try:
                         subprocess.call(run_STAR, shell=True, stdout=starout)
                     except Exception as e: print "FATAL ERROR - ", e  
@@ -514,7 +510,7 @@ def deduplication(fileNtag):
         # Indexing BAM files
         pysam.index(fileNtag[0]) 
         # Deduplicating BAM files
-        run_dedup = " ".join(["umi_tools dedup", "-I", fileNtag[0], fileNtag[1][1], "-L", os.path.join(log_folder, fileNtag[0].split("/")[-1].replace(fileNtag[1][0], "Dedup.log")), "-S", fileNtag[0].replace(fileNtag[1][0], "_dedup.bam")])
+        run_dedup = " ".join(["umi_tools dedup", "-I", fileNtag[0], fileNtag[1][1],"--umi-tag=UID", "-L", os.path.join(log_folder, fileNtag[0].split("/")[-1].replace(fileNtag[1][0], "Dedup.log")), "-S", fileNtag[0].replace(fileNtag[1][0], "_dedup.bam")])
         subprocess.call(run_dedup, shell=True)  
         # Removing indexes once the task has finished
         os.remove(fileNtag[0]+".bai")
@@ -540,7 +536,8 @@ def featureCounts(annotation_file, fCountsargs):
     fcin_files_files = " ".join(fc_files)
     run_featureCounts = " ".join(["featureCounts", fCountsargs[1], "-g gene_id", "-s 1", "-T", thrds, "-a",
     annotation_file, "-o", os.path.join(aligned_folder,"fCfiles"), fcin_files_files])
-    rep.append("COUNTING FEATURES\n"+run_featureCounts)
+    wfeatureCounts = " ".join([item.split("/")[-1] if "/" in item else item for item in run_featureCounts.split()])
+    rep.append("COUNTING FEATURES\n"+wfeatureCounts)
 
     try:
         subprocess.call(run_featureCounts, shell=True) 
@@ -851,6 +848,24 @@ def summary():
     with open(os.path.join(reports_folder,"SummarisedStats.csv"), 'w') as f:
         np.savetxt(f, np.vstack((new_ids, new_matrix)), delimiter="\t", fmt='%s')
 
+    try:
+        # Running MultiQC to get a summed Quality Control, summed evaluation of featureCounts and STAR aligner.
+        run_mc = " ".join(["multiqc", "-q", "-o", reports_folder, "-n", "FinalReport", reports_folder])
+        subprocess.call(run_mc, shell=True)
+        #Deleting .zip files from FastQC reports.
+        for path, subdirs, files in os.walk(reports_folder):
+            for name in files:
+                if name.endswith("fastqc.zip"):
+                    zipped_reports = os.path.join(path, name)
+                    os.remove(zipped_reports)
+        # Removing byproducts produced by MultiQC.           
+        shutil.rmtree(os.path.join(reports_folder,"FinalReport_data"))
+    
+    except:
+        pass
+
+
+
     return
 
 def main():
@@ -891,7 +906,8 @@ def main():
         print "\n2. - 6. NO Preprocessing of the data will be performed. This step has been skipped!"
     else:
         # Preprocessing steps - Universal steps 
-        preprocessing(pair_input, numoffiles, argms.get("Preprocessing", "transformation_file"), argms.get("Preprocessing", "cell_barcodes"),argms.get("Preprocessing", "sample_barcodes"))
+        preprocessing(pair_input, numoffiles, argms.get("Preprocessing", "transformation_file"), argms.get("Preprocessing", "cell_barcodes"),
+                    argms.get("Preprocessing", "sample_barcodes"),argms.get("Preprocessing", "cell_barcode_mm"),argms.get("Preprocessing", "sample_barcode_mm"))
 
     ### RefGenome_Aligning
     # 7. Align against the reference genome
