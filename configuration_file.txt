@@ -9,16 +9,18 @@
 ##
 ##	* Preprocessing
 ##		no_PreProcessing: if set True, no PreProcessing will be performed
-##		cellular_barcodes: .txt file with list of all cellular barcodes contained in the reads
 ##		transformation_file: .json pointing out the information position of R1 and R2
-##		sample_barcodes: .txt file containing the list with all sample barcodes used in the samples
+##		cell_barcodes: .txt file listing all cellular barcodes contained in the reads
+##		cell_barcode_mm: number of allowed mismatches in the cell barcodes (default: 1)
+##		sample_barcodes: .txt file listing all sample barcodes used in the data
+##		sample_barcode_mm: number of allowed mismatches in the sample barcodes (default: 1)
 ##		
-##		### For further details about the above files, please visit umis at GitHub ###
+##		### For further details about the above files, please visit umis on GitHub ###
 ##
 ##	* Ref.Genome_Aligning
 ##		no_ALignment: if set True, no aligning against the reference genome will be performed
 ##		### Refers to the default aligner - STAR ###
-##		reference_genome_idx: path to the reference genome indexes
+##		reference_genome_idx: path to the reference genome indexes of STAR
 ##
 ##	* Analysis - regulation parameters
 ##		no_CounTing: if set True, no main analysis will be performed
@@ -32,7 +34,7 @@
 ##		no_ExMat: if set True, no Expression Matrix will be generated
 ##		skip_genes: if set True, genes not found in the analysis will be skipped from the final
 ##					Expression Matrix 
-##		gene_list: path to mRNA ID list file (.csv file contain mRNA and ERCC IDs in a list)
+##		gene_list: path to mRNA ID list file (.csv file contain mRNA and ERCC IDs as a list)
 ##
 ##	* IO_Info - Input/Output options
 ##		input_dir: path to input Data folder (e.g home/Data)
@@ -71,7 +73,9 @@ no_QualityControl = False
 no_PreProcessing = False
 transformation_file = /transform.json
 cell_barcodes = /cell_barcodes.txt
+cell_barcode_mm = 1
 sample_barcodes = /sample_barcodes.txt
+sample_barcode_mm = 1
 
 
 [RefGenome_Aligning]
