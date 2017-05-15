@@ -317,12 +317,12 @@ def preprocessing(input_files, numoffiles, transformation_file, cell_barcodes, s
     print "------------------------------------------------------------"
 
     for i, pairs in enumerate(input_files):
-        print "%d/%d - Preprocessing of: %s" %(i+1, numoffiles, pairs[0].split("/")[-1])
+        print "%d/%d - Preprocessing of: %s" %(i+1, numoffiles, pairs[1].split("/")[-1].split(".")[0])
         
         # 2. Cell and Molecular Barcode transformation
         Demult_stime = datetime.now()
         print "%s | 2. Cell and Molecular barcode transformation: in progress .." %(Demult_stime.strftime("%H:%M:%S"))
-        run_demult = " ".join(["umis", "fastqtransform", "--cores", thrds, transformation_file, pairs[0], pairs[1], ">",
+        run_demult = " ".join(["umis", "fastqtransform", transformation_file, "--cores", thrds, pairs[0], pairs[1], ">",
         os.path.join(processed_data_folder, pairs[1].split("/")[-1].split(".")[0]+"_trsf.fastq")])
         w_demult = " ".join([item.split("/")[-1] if "/" in item else item for item in run_demult.split()])
         if i == 0: rep.append("UMIs - TRANSFORMATION\n"+w_demult)   
@@ -337,9 +337,8 @@ def preprocessing(input_files, numoffiles, transformation_file, cell_barcodes, s
         print "%s | 3. Filtering Reads with non-matching cell barcodes: in progress .." %(filtering_stime.strftime("%H:%M:%S"))
         for path, subdirs, files in os.walk(processed_data_folder):
             for name in files:
-                if name.endswith("_trsf.fastq"):
+                if name.endswith("_trsf.fastq") and (pairs[1].split("/")[-1].split(".")[0]) in name:
                     fastqtoCBfilter = os.path.join(path,name)
-
                     # Initial total reads
                     In_num_lines = sum(1 for line in open(fastqtoCBfilter))
                     summarise[fastqtoCBfilter.split("/")[-1].split("_trsf")[0]].append(("Initial Reads", In_num_lines/4))
@@ -358,50 +357,58 @@ def preprocessing(input_files, numoffiles, transformation_file, cell_barcodes, s
         # 4. Filtering Reads with non-matching sample barcodes
         sbfiltering_stime = datetime.now()
         print "%s | 4. Filtering Reads with non-matching sample barcodes: in progress .." %(filtering_stime.strftime("%H:%M:%S"))
-        fastqtoSBfilter = fastqtoCBfilter.replace("_trsf","_cb")
-        run_SBfilter = " ".join(["umis", "sb_filter", "--cores", thrds, "--nedit", sample_mm, "--bc", sample_barcodes, 
-        fastqtoSBfilter, ">", fastqtoSBfilter.replace("_cb","_sb")])
-        wSBfilter = " ".join([item.split("/")[-1] if "/" in item else item for item in run_SBfilter.split()])
-        if i == 0: rep.append("UMIs - SAMPLE BARCODE FILTER\n"+wSBfilter)
-        try:
-            subprocess.call(run_SBfilter, shell=True)
-        except Exception as e: print "FATAL ERROR - ", e  
-        os.remove(fastqtoSBfilter)
+        for path, subdirs, files in os.walk(processed_data_folder):
+            for name in files:
+                if name.endswith("_cb.fastq") and (pairs[1].split("/")[-1].split(".")[0]) in name:
+                    fastqtoSBfilter = os.path.join(path,name)
+                    run_SBfilter = " ".join(["umis", "sb_filter", "--cores", thrds, "--nedit", sample_mm, "--bc", sample_barcodes, 
+                    fastqtoSBfilter, ">", fastqtoSBfilter.replace("_cb","_sb")])
+                    wSBfilter = " ".join([item.split("/")[-1] if "/" in item else item for item in run_SBfilter.split()])
+                    if i == 0: rep.append("UMIs - SAMPLE BARCODE FILTER\n"+wSBfilter)
+                    try:
+                        subprocess.call(run_SBfilter, shell=True)
+                    except Exception as e: print "FATAL ERROR - ", e  
+                    os.remove(fastqtoSBfilter)
         sbfiltering_etime = datetime.now()
         print "Sample Filtering: Completed Successfully in %s" %(sbfiltering_etime - sbfiltering_stime)
 
        # 5. Filtering umis with non ACGT bases
         mbfiltering_stime = datetime.now()
-        print "%s | 5. Filtering umis with non ACGT bases: in progress .." %(filtering_stime.strftime("%H:%M:%S"))  
-        fastqtoMBfilter = fastqtoSBfilter.replace("_cb","_sb")
-        run_MBfilter = " ".join(["umis", "mb_filter", "--cores", thrds, 
-        fastqtoMBfilter, ">", fastqtoMBfilter.replace("_sb","_mb")])
-        wMBfilter = " ".join([item.split("/")[-1] if "/" in item else item for item in run_MBfilter.split()])
-        if i == 0: rep.append("UMIs - FILTERING READS WITH AMBIGUOUS BASES\n"+wMBfilter)
-        try:
-            subprocess.call(run_MBfilter, shell=True)
-        except Exception as e: print "FATAL ERROR - ", e
-        os.remove(fastqtoMBfilter)
+        print "%s | 5. Filtering umis with non ACGT bases: in progress .." %(filtering_stime.strftime("%H:%M:%S")) 
+        for path, subdirs, files in os.walk(processed_data_folder):
+            for name in files:
+                if name.endswith("_sb.fastq") and (pairs[1].split("/")[-1].split(".")[0]) in name:
+                    fastqtoMBfilter = os.path.join(path,name)
+                    run_MBfilter = " ".join(["umis", "mb_filter", "--cores", thrds, 
+                    fastqtoMBfilter, ">", fastqtoMBfilter.replace("_sb","_mb")])
+                    wMBfilter = " ".join([item.split("/")[-1] if "/" in item else item for item in run_MBfilter.split()])
+                    if i == 0: rep.append("UMIs - FILTERING READS WITH AMBIGUOUS BASES\n"+wMBfilter)
+                    try:
+                        subprocess.call(run_MBfilter, shell=True)
+                    except Exception as e: print "FATAL ERROR - ", e
+                    os.remove(fastqtoMBfilter)
         mbfiltering_etime = datetime.now()
         print "UMI filtering: Completed Successfully in %s" %(mbfiltering_etime - mbfiltering_stime)
 
         # 6. UID addition in the header of each read
         transf_stime = datetime.now()
         print "%s | 6. UID addition: in progress .." %str(transf_stime.strftime("%H:%M:%S"))
-        fastqtoUID = fastqtoMBfilter.replace("_sb","_mb")
-        
-        # Preprocessed total reads
-        num_lines = sum(1 for line in open(fastqtoUID))
-        summarise[fastqtoUID.split("/")[-1].split("_mb")[0]].append(("Reads after preprocessing", num_lines/4))
+        for path, subdirs, files in os.walk(processed_data_folder):
+            for name in files:
+                if name.endswith("_mb.fastq") and (pairs[1].split("/")[-1].split(".")[0]) in name:
+                    fastqtoUID = os.path.join(path,name)
+                    # Preprocessed total reads
+                    num_lines = sum(1 for line in open(fastqtoUID))
+                    summarise[fastqtoUID.split("/")[-1].split("_mb")[0]].append(("Reads after preprocessing", num_lines/4))
 
-        run_addUID = " ".join(["umis", "add_uid", "--cores", thrds, 
-        fastqtoUID, "| gzip -1", ">", fastqtoUID.replace("_mb.fastq",".fastq.gz")])
-        waddUID = " ".join([item.split("/")[-1] if "/" in item else item for item in run_addUID.split()])
-        if i == 0: rep.append("UMIs - UID ADDITION\n"+waddUID)
-        try:
-            subprocess.call(run_addUID, shell=True)
-        except Exception as e: print "FATAL ERROR - ", e  
-        os.remove(fastqtoUID)
+                    run_addUID = " ".join(["umis", "add_uid", "--cores", thrds, 
+                    fastqtoUID, "| gzip -1", ">", fastqtoUID.replace("_mb.fastq",".fastq.gz")])
+                    waddUID = " ".join([item.split("/")[-1] if "/" in item else item for item in run_addUID.split()])
+                    if i == 0: rep.append("UMIs - UID ADDITION\n"+waddUID)
+                    try:
+                        subprocess.call(run_addUID, shell=True)
+                    except Exception as e: print "FATAL ERROR - ", e  
+                    os.remove(fastqtoUID)
         transf_etime = datetime.now()
         print "UID addition: Completed Successfully in %s\n" %(transf_etime - transf_stime)
 
