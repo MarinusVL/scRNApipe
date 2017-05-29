@@ -75,3 +75,4 @@ For further information about each compartment of the pipeline you can run:
 ### __Dependencies__
 
 scRNApipe is dependent on umis, umi_tools, numpy, pysam, STAR, featureCounts, fastqc and multiqc
+and Python 2.7
