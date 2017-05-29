@@ -14,7 +14,7 @@ setup(
     packages=['scRNApipe'],
     url=['https://github.com/MarinusVL/scRNApipe'],
     keywords=['single cell RNA analysis'],
-    install_requires=['pysam>=0.8.3', 'numpy', 'multiqc', 'STAR', 'umis', 'umi_tools','natsort','python>=2.5,<3'],
+    install_requires=['pysam>=0.8.3', 'numpy', 'multiqc', 'STAR', 'umis', 'umi_tools','python>=2.5,<3'],
     dependency_links=['https://sourceforge.net/projects/subread/files/subread-1.5.2/subread-1.5.2-source.tar.gz/download',
                       'https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.5_source.zip'
                       ],
